@@ -1,16 +1,18 @@
 const post = require("../models/post.model");
 const user = require("../models/user.model");
+const jwt = require("../auth/jwt");
 
 const create = async (req, res) => {
   try {
-    //TODO: Extraer username desde el token
-    const { title, abstract, content, username } = req.body;
+    const { title, abstract, content } = req.body;
+    const username = jwt.extractSub(req);
     const p = new post();
     if (title) {
       p.title = title;
       p.abstract = abstract;
       p.content = content;
-      // p.user = user;
+
+      console.log(`creando post para ${username}`);
       const u = await user.findOne({ username: username });
       p.user = u;
       const result = await post.create(p);
@@ -35,8 +37,8 @@ const create = async (req, res) => {
 
 const findByUser = async (req, res) => {
   try {
-    //TODO: Cambiar a búsqueda del usuario en el token
-    const { username } = req.body;
+    const username = jwt.extractSub(req)
+    // console.log(`buscando post de ${username}`);
     const u = await user.findOne({ username: username });
     const result = await post.find({ user: u });
     return res.json({ result });
